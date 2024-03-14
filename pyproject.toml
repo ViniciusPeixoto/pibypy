@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "pibypy"
+version = "0.1.0"
+description = "Calculating pi using Python"
+authors = ["Vinicius Peixoto <vinicius.opeixoto@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

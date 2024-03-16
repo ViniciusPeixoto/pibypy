@@ -27,22 +27,24 @@ def _get_numerator(numerator: str) -> Generator[str, None, None]:
 
 
 def _generate_result(
-        remainder: str,
-        increment: str,
-        denominator: str,
-        result: str,
-    ) -> Tuple[str, str]:
-        remainder += increment
+    remainder: str,
+    increment: str,
+    denominator: str,
+    result: str,
+) -> Tuple[str, str]:
+    remainder += increment
 
-        if _fits(remainder, denominator):
-            partial_result, remainder = _calculate_division(remainder, denominator)
-            result += partial_result
+    if _fits(remainder, denominator):
+        partial_result, remainder = _calculate_division(remainder, denominator)
+        result += partial_result
 
-        return result, remainder
+    return result, remainder
 
 
 def _calculate_division(numerator: str, denominator: str) -> Tuple[str, str]:
-    return str(int(numerator) // int(denominator)), str(int(numerator) % int(denominator))
+    return str(int(numerator) // int(denominator)), str(
+        int(numerator) % int(denominator)
+    )
 
 
 def _fits(numerator: str, denominator: str) -> bool:

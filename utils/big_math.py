@@ -73,7 +73,7 @@ class Decimal:
         return self.is_negative
 
 
-def division(numerator: Decimal, denominator: Decimal) -> str:
+def division(numerator: Decimal, denominator: Decimal) -> Decimal:
     result_negative = False
     if (
         numerator.is_negative
@@ -105,7 +105,7 @@ def division(numerator: Decimal, denominator: Decimal) -> str:
     result.is_negative = result_negative
     result.update_number()
     result.clean_number()
-    return result.get_number()
+    return result
 
 
 def _get_numerator(numerator: str) -> Generator[str, None, None]:
@@ -141,7 +141,7 @@ def _fits(numerator: str, denominator: str) -> bool:
     return bool(float(numerator) // float(denominator))
 
 
-def add(first: Decimal, second: Decimal) -> str:
+def add(first: Decimal, second: Decimal) -> Decimal:
     if first.is_negative and not second.is_negative:
         first.is_negative = False
         return sub(second, first)
@@ -162,7 +162,7 @@ def add(first: Decimal, second: Decimal) -> str:
 
     result = Decimal(number=result_number, is_negative=result_negative)
     result.clean_number()
-    return result.get_number()
+    return result
 
 
 def _add_string(digit_1: str, digit_2: str, carry: str) -> str:
@@ -180,7 +180,7 @@ def _sub_string(digit_1: str, digit_2: str, borrow: str, returned: str) -> str:
     return str(int(borrow + digit_1) - int(digit_2) - int(returned)), borrow
 
 
-def sub(first: Decimal, second: Decimal) -> str:
+def sub(first: Decimal, second: Decimal) -> Decimal:
     if first.is_negative and not second.is_negative:
         second.is_negative = True
         return add(second, first)
@@ -205,4 +205,34 @@ def sub(first: Decimal, second: Decimal) -> str:
 
     result = Decimal(number=result_number, is_negative=result_negative)
     result.clean_number()
-    return result.get_number()
+    return result
+
+
+def multiplication(multiplicand: Decimal, multiplier: Decimal) -> Decimal:
+    pass
+
+
+def power(base: Decimal, exponent: str):
+    pass
+
+
+def arctan_1_x(number: str) -> str:
+    result = Decimal()
+    step = 0
+    operation = {
+        "0": add,
+        "1": sub,
+    }
+    while len(result.decimal) < DECIMAL_LIMIT:
+        op = str(step % 2)
+        coefficient = 2 * step + 1
+        result = operation[op](
+            result,
+            division(
+                Decimal(whole="1"),
+                multiplication(
+                    Decimal(whole=coefficient),
+                    power(Decimal(number=number), str(coefficient)),
+                ),
+            ),
+        )

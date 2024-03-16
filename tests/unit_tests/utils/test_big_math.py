@@ -76,7 +76,7 @@ def test_calculate_division(numerator, denominator, expected):
 def test_division(numerator, denominator, fixed, repeating_decimal):
     result = division(numerator, denominator)
 
-    assert result == fixed + repeating_decimal
+    assert result == Decimal(number=(fixed + repeating_decimal))
 
 
 @pytest.mark.parametrize(
@@ -147,32 +147,32 @@ def test_add_string(digit_1, digit_2, carry, expected):
         (
             Decimal(number="33.3"),
             Decimal(number="2.222"),
-            "35.522",
+            Decimal(number="35.522"),
         ),
         (
             Decimal(number="22.222"),
             Decimal(number="0.0"),
-            "22.222",
+            Decimal(number="22.222"),
         ),
         (
             Decimal(number="12.345"),
             Decimal(number="67.89"),
-            "80.235",
+            Decimal(number="80.235"),
         ),
         (
             Decimal(number="-12.345"),
             Decimal(number="67.89"),
-            "55.545",
+            Decimal(number="55.545"),
         ),
         (
             Decimal(number="67.89"),
             Decimal(number="-12.345"),
-            "55.545",
+            Decimal(number="55.545"),
         ),
         (
             Decimal(number="-12.345"),
             Decimal(number="-67.89"),
-            "-80.235",
+            Decimal(number="-80.235"),
         ),
     ],
 )
@@ -227,32 +227,32 @@ def test_sub_string(digit_1, digit_2, borrow, returned, expected):
         (
             Decimal(number="33.3"),
             Decimal(number="2.222"),
-            "31.078",
+            Decimal(number="31.078"),
         ),
         (
             Decimal(number="22.222"),
             Decimal(number="0.0"),
-            "22.222",
+            Decimal(number="22.222"),
         ),
         (
             Decimal(number="12.345"),
             Decimal(number="67.89"),
-            "-55.545",
+            Decimal(number="-55.545"),
         ),
         (
             Decimal(number="-12.345"),
             Decimal(number="67.89"),
-            "-80.235",
+            Decimal(number="-80.235"),
         ),
         (
             Decimal(number="67.89"),
             Decimal(number="-12.345"),
-            "80.235",
+            Decimal(number="80.235"),
         ),
         (
             Decimal(number="-12.345"),
             Decimal(number="-67.89"),
-            "55.545",
+            Decimal(number="55.545"),
         ),
     ],
 )

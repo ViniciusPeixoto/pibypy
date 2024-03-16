@@ -46,10 +46,11 @@ class Decimal:
         self.number = f"{self.whole if self.whole else '0'}.{self.decimal if self.decimal else '0'}"
 
     def clean_number(self):
-        cleaned_decimal = self.decimal.rstrip("0")
+        cleaned_whole = self.whole.lstrip("0").split(".")
+        self.whole = cleaned_whole[0] if cleaned_whole[0] else "0"
+        left = "".join(cleaned_whole[1:]) if len(cleaned_whole) > 1 else ""
+        cleaned_decimal = (left + self.decimal).rstrip("0").replace(".", "")
         self.decimal = cleaned_decimal if cleaned_decimal else "0"
-        cleaned_whole = self.whole.lstrip("0")
-        self.whole = cleaned_whole if cleaned_whole else "0"
         self.number = f"{self.whole}.{self.decimal}"
 
     def match_size(self, other):
@@ -209,7 +210,48 @@ def sub(first: Decimal, second: Decimal) -> Decimal:
 
 
 def multiplication(multiplicand: Decimal, multiplier: Decimal) -> Decimal:
-    pass
+    result_negative = False
+    if (
+        multiplicand.is_negative
+        and not multiplier.is_negative
+        or not multiplicand.is_negative
+        and multiplier.is_negative
+    ):
+        result_negative = True
+
+    decimal_places = 2 * max(len(multiplicand.decimal), len(multiplier.decimal))
+    _match_number_sizes(multiplicand, multiplier)
+    multiplicand.number, multiplier.number = (
+        multiplicand.number.replace(".", ""),
+        multiplier.number.replace(".", ""),
+    )
+    multiplicand.update_decimal()
+    multiplier.update_decimal()
+    result, partial_result, partial_innter_result = Decimal(), [], []
+
+    for shift, digit_2 in enumerate(reversed(multiplier.number)):
+        outer_result = Decimal()
+        for inner_shift, digit_1 in enumerate(reversed(multiplicand.number)):
+            inner_result = Decimal()
+            for _ in range(int(digit_2)):
+                inner_result = add(inner_result, Decimal(number=digit_1))
+            partial_innter_result.append(inner_result.whole + inner_shift * "0")
+        for number in partial_innter_result:
+            outer_result = add(outer_result, Decimal(number=number))
+        outer_result.whole = outer_result.whole + shift * "0"
+        outer_result.update_number()
+        partial_result.append(outer_result)
+        partial_innter_result.clear()
+
+    for number in partial_result:
+        result = add(result, number)
+
+    result.is_negative = result_negative
+    result.whole = decimal_places * "0" + result.whole
+    result.whole = result.whole[:-decimal_places] + "." + result.whole[-decimal_places:]
+    result.clean_number()
+    result.update_number()
+    return result
 
 
 def power(base: Decimal, exponent: str):

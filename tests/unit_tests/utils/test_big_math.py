@@ -9,6 +9,7 @@ from utils.big_math import (
     add,
     _sub_string,
     sub,
+    multiplication,
     Decimal,
 )
 
@@ -258,5 +259,41 @@ def test_sub_string(digit_1, digit_2, borrow, returned, expected):
 )
 def test_sub(first, second, expected):
     result = sub(first, second)
+
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "first, second, expected",
+    [
+        (
+            Decimal(number="33.3"),
+            Decimal(number="2.222"),
+            Decimal(number="73.9926"),
+        ),
+        (
+            Decimal(number="0.0003"),
+            Decimal(number="2.222"),
+            Decimal(number="0.0006666"),
+        ),
+        (
+            Decimal(number="-33.3"),
+            Decimal(number="2.222"),
+            Decimal(number="-73.9926"),
+        ),
+        (
+            Decimal(number="33.3"),
+            Decimal(number="-2.222"),
+            Decimal(number="-73.9926"),
+        ),
+        (
+            Decimal(number="-33.3"),
+            Decimal(number="-2.222"),
+            Decimal(number="73.9926"),
+        ),
+    ],
+)
+def test_multiplication(first, second, expected):
+    result = multiplication(first, second)
 
     assert result == expected

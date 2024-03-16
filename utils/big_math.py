@@ -161,7 +161,7 @@ def add(first: Decimal, second: Decimal) -> Decimal:
         carry, partial_result = _add_string(digit_1, digit_2, carry)
         result_number = partial_result + result_number
 
-    result = Decimal(number=result_number, is_negative=result_negative)
+    result = Decimal(number=carry + result_number, is_negative=result_negative)
     result.clean_number()
     return result
 
@@ -210,28 +210,29 @@ def sub(first: Decimal, second: Decimal) -> Decimal:
 
 
 def multiplication(multiplicand: Decimal, multiplier: Decimal) -> Decimal:
+    mpc, mpl = Decimal(**multiplicand.__dict__), Decimal(**multiplier.__dict__)
     result_negative = False
     if (
-        multiplicand.is_negative
-        and not multiplier.is_negative
-        or not multiplicand.is_negative
-        and multiplier.is_negative
+        mpc.is_negative
+        and not mpl.is_negative
+        or not mpc.is_negative
+        and mpl.is_negative
     ):
         result_negative = True
 
-    decimal_places = 2 * max(len(multiplicand.decimal), len(multiplier.decimal))
-    _match_number_sizes(multiplicand, multiplier)
-    multiplicand.number, multiplier.number = (
-        multiplicand.number.replace(".", ""),
-        multiplier.number.replace(".", ""),
+    decimal_places = 2 * max(len(mpc.decimal), len(mpl.decimal))
+    _match_number_sizes(mpc, mpl)
+    mpc.number, mpl.number = (
+        mpc.number.replace(".", ""),
+        mpl.number.replace(".", ""),
     )
-    multiplicand.update_decimal()
-    multiplier.update_decimal()
+    mpc.update_decimal()
+    mpl.update_decimal()
     result, partial_result, partial_innter_result = Decimal(), [], []
 
-    for shift, digit_2 in enumerate(reversed(multiplier.number)):
+    for shift, digit_2 in enumerate(reversed(mpl.number)):
         outer_result = Decimal()
-        for inner_shift, digit_1 in enumerate(reversed(multiplicand.number)):
+        for inner_shift, digit_1 in enumerate(reversed(mpc.number)):
             inner_result = Decimal()
             for _ in range(int(digit_2)):
                 inner_result = add(inner_result, Decimal(number=digit_1))
@@ -255,7 +256,13 @@ def multiplication(multiplicand: Decimal, multiplier: Decimal) -> Decimal:
 
 
 def power(base: Decimal, exponent: str):
-    pass
+    result = Decimal(number="1")
+    if exponent == "0":
+        return result
+    for _ in range(int(exponent)):
+        result = multiplication(result, base)
+
+    return result
 
 
 def arctan_1_x(number: str) -> str:

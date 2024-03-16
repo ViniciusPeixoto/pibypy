@@ -10,6 +10,7 @@ from utils.big_math import (
     _sub_string,
     sub,
     multiplication,
+    power,
     Decimal,
 )
 
@@ -295,5 +296,26 @@ def test_sub(first, second, expected):
 )
 def test_multiplication(first, second, expected):
     result = multiplication(first, second)
+
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "base, exponent, expected",
+    [
+        (
+            Decimal(number="3"),
+            "3",
+            Decimal(number="27"),
+        ),
+        (
+            Decimal(number="42.314"),
+            "9",
+            Decimal(number="434867283494028.836662386395664854760425984"),
+        ),
+    ],
+)
+def test_power(base, exponent, expected):
+    result = power(base, exponent)
 
     assert result == expected

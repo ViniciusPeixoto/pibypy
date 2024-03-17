@@ -193,7 +193,7 @@ def sub(first: Decimal, second: Decimal) -> Decimal:
 
     returned, result_number, result_negative = "0", "", False
     _match_number_sizes(st, nd)
-    if float(st.number) < float(nd.number):
+    if greater(nd, st):
         st, nd = nd, st
         if not st.is_negative and not nd.is_negative:
             result_negative = True
@@ -266,6 +266,17 @@ def power(base: Decimal, exponent: str):
         result = multiplication(result, bs)
 
     return result
+
+
+def greater(first: Decimal, second: Decimal) -> bool:
+    for idx, number in enumerate(first.number):
+        if number == ".":
+            continue
+
+        if int(first.number[idx]) > int(second.number[idx]):
+            return True
+        elif int(first.number[idx]) < int(second.number[idx]):
+            return False
 
 
 def arctan_1_x(number: Decimal) -> str:

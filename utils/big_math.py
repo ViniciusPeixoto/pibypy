@@ -25,6 +25,7 @@ class Decimal:
             self.whole = "0"
             self.decimal = "0"
             self.is_negative = False
+        self.decimal = self.decimal[:DECIMAL_LIMIT]
 
     def __eq__(self, other: object) -> bool:
         return all(
@@ -75,32 +76,34 @@ class Decimal:
 
 
 def division(numerator: Decimal, denominator: Decimal) -> Decimal:
+    num, den = Decimal(**numerator.__dict__), Decimal(**denominator.__dict__)
     result_negative = False
     if (
-        numerator.is_negative
-        and not denominator.is_negative
-        or not numerator.is_negative
-        and denominator.is_negative
+        num.is_negative
+        and not den.is_negative
+        or not num.is_negative
+        and den.is_negative
     ):
         result_negative = True
 
     result, remainder = Decimal(), ""
-    _match_number_sizes(numerator, denominator)
-    numerator.number, denominator.number = (
-        numerator.number.replace(".", ""),
-        denominator.number.replace(".", ""),
+    _match_number_sizes(num, den)
+    num.number, den.number = (
+        num.number.replace(".", ""),
+        den.number.replace(".", ""),
     )
-    numerator.update_decimal()
-    denominator.update_decimal()
+    num.update_decimal()
+    den.update_decimal()
 
-    for number in _get_numerator(numerator.number):
+    for number in _get_num(num.number):
         result.whole, remainder = _generate_result(
-            remainder, number, denominator.number, result.whole
+            remainder, number, den.number, result.whole
         )
 
+    result.decimal = ""
     while len(result.decimal) < DECIMAL_LIMIT and remainder != "0":
         result.decimal, remainder = _generate_result(
-            remainder, "0", denominator.number, result.decimal
+            remainder, "0", den.number, result.decimal
         )
 
     result.is_negative = result_negative
@@ -109,52 +112,50 @@ def division(numerator: Decimal, denominator: Decimal) -> Decimal:
     return result
 
 
-def _get_numerator(numerator: str) -> Generator[str, None, None]:
-    for char in numerator:
+def _get_num(num: str) -> Generator[str, None, None]:
+    for char in num:
         yield char
 
 
 def _generate_result(
     remainder: str,
     increment: str,
-    denominator: str,
+    den: str,
     result: str,
 ) -> Tuple[str, str]:
     remainder += increment
 
-    if _fits(remainder, denominator):
-        partial_result, remainder = _calculate_division(remainder, denominator)
-        if result == "0":
-            result = partial_result
-        else:
-            result += partial_result
+    if _fits(remainder, den):
+        partial_result, remainder = _calculate_division(remainder, den)
+        result += partial_result
+    else:
+        result += "0"
 
     return result, remainder
 
 
-def _calculate_division(numerator: str, denominator: str) -> Tuple[str, str]:
-    return str(int(numerator) // int(denominator)), str(
-        int(numerator) % int(denominator)
-    )
+def _calculate_division(num: str, den: str) -> Tuple[str, str]:
+    return str(int(num) // int(den)), str(int(num) % int(den))
 
 
-def _fits(numerator: str, denominator: str) -> bool:
-    return bool(float(numerator) // float(denominator))
+def _fits(num: str, den: str) -> bool:
+    return bool(float(num) // float(den))
 
 
 def add(first: Decimal, second: Decimal) -> Decimal:
-    if first.is_negative and not second.is_negative:
-        first.is_negative = False
-        return sub(second, first)
-    elif not first.is_negative and second.is_negative:
-        second.is_negative = False
-        return sub(first, second)
+    st, nd = Decimal(**first.__dict__), Decimal(**second.__dict__)
+    if st.is_negative and not nd.is_negative:
+        st.is_negative = False
+        return sub(nd, st)
+    elif not st.is_negative and nd.is_negative:
+        nd.is_negative = False
+        return sub(st, nd)
 
-    result_negative = first.is_negative and second.is_negative
+    result_negative = st.is_negative and nd.is_negative
     result_number = ""
-    _match_number_sizes(first, second)
+    _match_number_sizes(st, nd)
     carry = "0"
-    for digit_1, digit_2 in zip(reversed(first.number), reversed(second.number)):
+    for digit_1, digit_2 in zip(reversed(st.number), reversed(nd.number)):
         if digit_1 == ".":
             result_number = "." + result_number
             continue
@@ -182,21 +183,22 @@ def _sub_string(digit_1: str, digit_2: str, borrow: str, returned: str) -> str:
 
 
 def sub(first: Decimal, second: Decimal) -> Decimal:
-    if first.is_negative and not second.is_negative:
-        second.is_negative = True
-        return add(second, first)
-    elif not first.is_negative and second.is_negative:
-        second.is_negative = False
-        return add(first, second)
+    st, nd = Decimal(**first.__dict__), Decimal(**second.__dict__)
+    if st.is_negative and not nd.is_negative:
+        nd.is_negative = True
+        return add(nd, st)
+    elif not st.is_negative and nd.is_negative:
+        nd.is_negative = False
+        return add(st, nd)
 
     returned, result_number, result_negative = "0", "", False
-    _match_number_sizes(first, second)
-    if float(first.number) < float(second.number):
-        first, second = second, first
-        if not first.is_negative and not second.is_negative:
+    _match_number_sizes(st, nd)
+    if float(st.number) < float(nd.number):
+        st, nd = nd, st
+        if not st.is_negative and not nd.is_negative:
             result_negative = True
 
-    for digit_1, digit_2 in zip(reversed(first.number), reversed(second.number)):
+    for digit_1, digit_2 in zip(reversed(st.number), reversed(nd.number)):
         if digit_1 == ".":
             result_number = "." + result_number
             continue
@@ -256,32 +258,35 @@ def multiplication(multiplicand: Decimal, multiplier: Decimal) -> Decimal:
 
 
 def power(base: Decimal, exponent: str):
+    bs = Decimal(**base.__dict__)
     result = Decimal(number="1")
     if exponent == "0":
         return result
     for _ in range(int(exponent)):
-        result = multiplication(result, base)
+        result = multiplication(result, bs)
 
     return result
 
 
-def arctan_1_x(number: str) -> str:
-    result = Decimal()
+def arctan_1_x(number: Decimal) -> str:
     step = 0
     operation = {
         "0": add,
         "1": sub,
     }
-    while len(result.decimal) < DECIMAL_LIMIT:
+    result, partial_result = Decimal(), Decimal()
+    while True:
         op = str(step % 2)
-        coefficient = 2 * step + 1
-        result = operation[op](
-            result,
-            division(
-                Decimal(whole="1"),
-                multiplication(
-                    Decimal(whole=coefficient),
-                    power(Decimal(number=number), str(coefficient)),
-                ),
-            ),
-        )
+        coefficient = str(2 * step + 1)
+        p = power(number, coefficient)
+        m = multiplication(Decimal(number=coefficient), p)
+        d = division(Decimal(number="1"), m)
+        partial_result = operation[op](result, d)
+        difference = sub(result, partial_result)
+        if (
+            difference.number[:DECIMAL_LIMIT]
+            == f"0.{DECIMAL_LIMIT * '0'}"[:DECIMAL_LIMIT]
+        ):
+            return partial_result
+        result = partial_result
+        step += 1

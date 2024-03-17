@@ -11,6 +11,7 @@ from utils.big_math import (
     sub,
     multiplication,
     power,
+    arctan_1_x,
     Decimal,
 )
 
@@ -69,6 +70,7 @@ def test_calculate_division(numerator, denominator, expected):
         (Decimal(number="3.0"), Decimal(number="2.0"), "1.5", ""),
         (Decimal(number="1.0"), Decimal(number="3.0"), "0.", "3"),
         (Decimal(number="1.0"), Decimal(number="7.0"), "0.", "142857"),
+        (Decimal(number="1.0"), Decimal(number="70.0"), "0.0", "142857"),
         (Decimal(number="-3.0"), Decimal(number="2.0"), "-1.5", ""),
         (Decimal(number="1.0"), Decimal(number="-3.0"), "-0.", "3"),
         (Decimal(number="-1.0"), Decimal(number="-7.0"), "0.", "142857"),
@@ -317,5 +319,20 @@ def test_multiplication(first, second, expected):
 )
 def test_power(base, exponent, expected):
     result = power(base, exponent)
+
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "number, expected",
+    [
+        (
+            Decimal(number="3"),
+            Decimal(number="0.321750554396642193401404614358661"),
+        ),
+    ],
+)
+def test_arctan(number, expected):
+    result = arctan_1_x(number)
 
     assert result == expected

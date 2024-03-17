@@ -1,6 +1,9 @@
+from utils.aggregate import aggregate
+
+
 def main() -> None:
-    output = "test"
-    print(output)
+    output = aggregate()
+    print(output.number)
 
 
 if __name__ == "__main__":

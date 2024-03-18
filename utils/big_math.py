@@ -1,7 +1,11 @@
 import os
+import logging
 from typing import Generator, Tuple
 
 DECIMAL_LIMIT = int(os.getenv("DECIMAL_LIMIT", "10"))
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(filename="logs/pilog.log", level=logging.INFO)
 
 
 class Decimal:
@@ -279,25 +283,39 @@ def greater(first: Decimal, second: Decimal) -> bool:
             return False
 
 
-def arctan_1_x(number: Decimal) -> str:
+def epsilon(first: Decimal, second: Decimal) -> bool:
+    """
+    If the difference of the first and second is arbitrarily small
+    """
+    st, nd = Decimal(**first.__dict__), Decimal(**second.__dict__)
+    difference = sub(st, nd)
+    difference.decimal = (difference.decimal + f"{DECIMAL_LIMIT * '0'}")[:DECIMAL_LIMIT]
+    difference.update_number()
+    limit = f"0.{DECIMAL_LIMIT * '0'}"
+    return difference.number == limit
+
+
+def arctan_1_x(number: Decimal, name="") -> str:
+    logger.info(f"Arctan: 1 / {number.number}")
     step = 0
     operation = {
         "0": add,
         "1": sub,
     }
+    tab = "\t"
     result, partial_result = Decimal(), Decimal()
     while True:
         op = str(step % 2)
         coefficient = str(2 * step + 1)
+        logger.info(
+            f"{name+tab if name else ''} Step #{step}: {'-' if op == '1' else '+'}1/({coefficient}*{number.number}^{coefficient})"
+        )
         p = power(number, coefficient)
         m = multiplication(Decimal(number=coefficient), p)
         d = division(Decimal(number="1"), m)
         partial_result = operation[op](result, d)
-        difference = sub(result, partial_result)
-        if (
-            difference.number[:DECIMAL_LIMIT]
-            == f"0.{DECIMAL_LIMIT * '0'}"[:DECIMAL_LIMIT]
-        ):
+        if epsilon(result, partial_result):
+            logger.info(f"Arctan (1 / {number.number}): done")
             return partial_result
         result = partial_result
         step += 1

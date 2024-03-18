@@ -110,7 +110,7 @@ def aggregate() -> Decimal:
         partial(calculate_doc),
     ]
 
-    with get_context("spawn").Pool(processes=3) as pool:
+    with get_context("spawn").Pool() as pool:
         logger.info("Initializing operations...")
         op_results = pool.imap_unordered(map_operation, op_list)
 
@@ -118,11 +118,6 @@ def aggregate() -> Decimal:
             results.update(result)
 
             logger.info(f"Gathering results for {next(iter(result))}: done")
-
-    # for op in ops:
-    #     logger.info(f"Gathering results from {op}")
-    #     results.update(operation(op))
-    #     logger.info(f"Gathering results from {op}: done")
 
     return sub(
         add(
